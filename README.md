@@ -37,7 +37,7 @@ index.html
 css/   main.css · sidebar.css · reader.css
 js/    utils.js · epub-parser.js · pdf-reader.js · settings.js
        annotations.js · reader.js · navigation.js
-       pdf.min.mjs · pdf.worker.min.mjs      ← los descargas tú
+       pdf.min.mjs · pdf.worker.min.mjs
 icons/ favicon.png
 ```
 Orden de carga (importa): `utils` → `epub-parser` → `pdf-reader` → `settings` → `annotations` → `reader` → `navigation`.
