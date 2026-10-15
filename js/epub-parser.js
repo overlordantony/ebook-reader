@@ -8,6 +8,13 @@ const DESCARTAR = /^(script|style|iframe|object|embed|form|link|meta|svg|math|he
 /** Resuelve `href` relativo al archivo `base` dentro del ZIP. */
 const res = (base, href) => decodeURIComponent(new URL(href, 'http://x/' + base).pathname.slice(1));
 const xml = (t, tipo = 'application/xml') => new DOMParser().parseFromString(t, tipo);
+/** Parsea XHTML como XML estricto (respeta <title/>, <a id=".."/>, etc.). Si falla (p. ej. entidades
+ *  HTML como &nbsp;), cae a HTML arreglando antes las etiquetas autocerradas que HTML no entiende. */
+const xhtml = t => {
+  const d = xml(t, 'application/xhtml+xml');
+  if (!d.getElementsByTagName('parsererror').length && d.body) return d;
+  return xml(t.replace(/<(title|script|style|textarea)\b([^>]*?)\/>/gi, '<$1$2></$1>'), 'text/html');
+};
 
 /** Lee el directorio central de un ZIP. @returns {{get(nombre):Promise<Uint8Array|null>, img:Object}} */
 function leerZip(buf) {
@@ -58,7 +65,7 @@ async function abrir(archivo) {
   const ncxI = man[spEl && spEl.getAttribute('toc')] || Object.values(man).find(m => m.tipo === 'application/x-dtbncx+xml');
   let toc = [];
   if (navI) {
-    const d = xml(await txt(navI.path), 'text/html');
+    const d = xhtml(await txt(navI.path));
     const nav = [...d.querySelectorAll('nav')].find(n => (n.getAttribute('epub:type') || n.getAttribute('type') || '').includes('toc')) || d.querySelector('nav');
     const ol = o => [...o.children].filter(l => l.localName === 'li').map(l => {
       const a = l.querySelector('a, span'), sub = [...l.children].find(c => c.localName === 'ol'), h = a && a.getAttribute('href');
@@ -128,7 +135,7 @@ const scope = css => css.replace(/\/\*[\s\S]*?\*\//g, '')
 async function cargar(libro, i, solo) {
   if (libro.pdf) return App.Pdf.cargar(libro, i, solo); // PDF: cada página es un "capítulo"
   const c = libro.capitulos[i], zip = libro._zip;
-  const d = xml(td.decode(await zip.get(c.path) || new Uint8Array()), 'text/html');
+  const d = xhtml(td.decode(await zip.get(c.path) || new Uint8Array()));
   const frag = document.createDocumentFragment();
   await sanear(d.body, c.path, zip, frag);
   let css = '';

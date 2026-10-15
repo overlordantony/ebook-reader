@@ -2,16 +2,20 @@
  *  Cada página del PDF se trata como un "capítulo" de una sola pantalla, así que
  *  progreso, estante, anotaciones, búsqueda y persistencia funcionan igual que en EPUB. */
 (() => {
-const VER = '4.10.38', BASE = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${VER}/`;
+// PDF.js local: pdf.min.mjs y pdf.worker.min.mjs deben estar en la misma carpeta que este archivo (js/).
+// Se resuelven desde la URL de este script, así no dependen de dónde esté index.html.
+const AQUI = document.currentScript.src;
+const RUTA = f => new URL(f, AQUI).href;
 let lib;
 const ctx = document.createElement('canvas').getContext('2d'); // para medir el ancho del texto
 
-/** Carga PDF.js solo al abrir el primer PDF. El worker se sirve como blob para evitar el bloqueo por CORS. */
+/** Carga PDF.js desde archivos locales, solo al abrir el primer PDF. */
 async function cargarLib() {
   if (lib) return lib;
-  const l = await import(BASE + 'pdf.min.mjs');
-  const src = await (await fetch(BASE + 'pdf.worker.min.mjs')).text();
-  l.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
+  let l;
+  try { l = await import(RUTA('pdf.min.mjs')); }
+  catch (e) { throw new Error('No se pudo cargar js/pdf.min.mjs. Revisa que el archivo exista y que abras la app con un servidor (http://localhost), no con file://.'); }
+  l.GlobalWorkerOptions.workerSrc = RUTA('pdf.worker.min.mjs');
   return (lib = l);
 }
 /** Multiplicación de matrices 2D de PDF (equivale a Util.transform de PDF.js). */
