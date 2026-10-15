@@ -3,7 +3,7 @@
 const td = new TextDecoder();
 const MIME = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', svg: 'image/svg+xml', webp: 'image/webp' };
 const TAGS = new Set('p div span h1 h2 h3 h4 h5 h6 em strong i b u s sub sup br hr ul ol li blockquote pre code a img figure figcaption table thead tbody tr td th section article aside cite small dl dt dd'.split(' '));
-const ATTRS = ['class', 'alt', 'title', 'colspan', 'rowspan'];
+const ATTRS = ['alt', 'title', 'colspan', 'rowspan'];
 const DESCARTAR = /^(script|style|iframe|object|embed|form|link|meta|svg|math|head|title|button|input|select|textarea|audio|video|base)$/;
 /** Resuelve `href` relativo al archivo `base` dentro del ZIP. */
 const res = (base, href) => decodeURIComponent(new URL(href, 'http://x/' + base).pathname.slice(1));
@@ -106,6 +106,8 @@ async function sanear(src, base, zip, out) {
     const c = document.createElement(t);
     for (const a of ATTRS) if (n.hasAttribute(a)) c.setAttribute(a, n.getAttribute(a));
     if (n.id) c.id = 'x-' + n.id; // prefijo: evita choques con los ids de la app
+    const cl = (n.getAttribute('class') || '').split(/\s+/).filter(Boolean); // y con las clases (.nota, .libro, .btn…)
+    if (cl.length) c.className = cl.map(k => 'x-' + k).join(' ');
     if (t === 'img') {
       const s = n.getAttribute('src');
       if (s && !/^(https?:|data:|\/\/)/i.test(s)) {
@@ -124,12 +126,13 @@ async function sanear(src, base, zip, out) {
   }
 }
 
-/** Limita el CSS del libro a #contenido y descarta lo que choca con los ajustes del lector. */
+/** Limita el CSS del libro a #contenido: prefija clases/ids, descarta fuente/color/saltos de página
+ *  y las reglas de html/body (el lector controla el contenedor raíz). */
 const scope = css => css.replace(/\/\*[\s\S]*?\*\//g, '')
   .replace(/@[^{;]+(?:\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}|;)/g, '')
   .replace(/url\([^)]*\)/gi, 'none')
-  .replace(/(^|[{;\s])(font-family|font-size|line-height|color|background(?:-color)?)\s*:[^;}]*;?/gi, '$1')
-  .replace(/(^|\})\s*([^{}]+)\{/g, (m, a, s) => a + s.split(',').map(x => '#contenido ' + x.trim().replace(/^(html|body)\s*/i, '')).join(',') + '{');
+  .replace(/(^|[{;\s])(font-family|font-size|line-height|color|background(?:-color)?|(?:page-)?break-(?:before|after|inside))\s*:[^;}]*;?/gi, '$1')
+  .replace(/(^|\})\s*([^{}]+)\{/g, (m, a, s) => a + s.split(',').map(x => /^(html|body)$/i.test(x.trim()) ? '#contenido .x-raiz' : '#contenido ' + x.trim().replace(/^(html|body)\s+/i, '').replace(/([.#])(-?[_a-zA-Z][\w-]*)/g, '$1x-$2')).join(',') + '{');
 
 /** Carga un capítulo: devuelve {frag, css} ya saneados. */
 async function cargar(libro, i, solo) {
