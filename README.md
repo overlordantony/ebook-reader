@@ -1,12 +1,5 @@
 # Lector EBook
-
 Lector de **EPUB** y **PDF** en HTML + CSS + JavaScript vanilla, sin frameworks. El EPUB no usa librerías; el PDF usa [PDF.js](https://mozilla.github.io/pdf.js/) en local.
-
-## Cómo abrir
-1. Descarga `pdf.min.mjs` y `pdf.worker.min.mjs` (misma versión de PDF.js) y colócalos en `js/`, junto a `pdf-reader.js`. Solo se cargan al abrir el primer PDF.
-2. Sirve la carpeta con **Live Server** de VS Code o con `python -m http.server` y abre `http://localhost:…`.
-   - Con doble clic (`file://`) el EPUB funciona, pero el PDF **no**: los módulos y el worker de PDF.js no cargan desde `file://`.
-3. Pulsa «Abrir libro» o arrastra un `.epub` o `.pdf` a la ventana. Al recargar vuelves exactamente donde quedaste.
 
 ## Atajos
 | Tecla | Acción |
@@ -37,7 +30,6 @@ En móvil: desliza a izquierda/derecha para cambiar de página.
 - El índice usa el esquema (marcadores) del PDF; si no tiene, agrupa las páginas de 20 en 20.
 - Tema claro/oscuro/sepia y ancho de columna aplican al PDF; tamaño de fuente, fuente e interlineado no (el PDF trae su propio diseño).
 - Los PDF escaneados (solo imagen) no tienen texto: no se pueden subrayar ni buscar.
-- No hay enlaces internos clicables dentro de las páginas.
 
 ## Estructura
 ```
@@ -49,13 +41,3 @@ js/    utils.js · epub-parser.js · pdf-reader.js · settings.js
 icons/ favicon.png
 ```
 Orden de carga (importa): `utils` → `epub-parser` → `pdf-reader` → `settings` → `annotations` → `reader` → `navigation`.
-
-## Reutilizarlo en otro proyecto
-Está pensado para vivir solo, pero si lo unes a otros proyectos, esto es lo que puede chocar:
-- **Global JS:** todo cuelga de `window.App` (también existe la constante global `App`). Si otro proyecto usa ese nombre, renómbralo en todos los archivos.
-- **Almacenamiento:** localStorage usa las claves `aj` y `ultimo`; IndexedDB usa la base `lectura-epub` (almacenes `libros` y `archivos`). Prefíjalas si compartes origen con otra app.
-- **CSS global:** `main.css` define `*`, `body` (flex, `overflow:hidden`), `[hidden]`, `button`, `.btn` y `.fila`; `sidebar.css` y `reader.css` usan ids como `#sidebar`, `#lector`, `#pagina`, `#contenido` y clases como `.nota`, `.libro`, `.cap`, `.flecha`. Si lo montas dentro de otra página, encapsula todo bajo un contenedor propio.
-- **DOM esperado:** los scripts buscan por id los elementos de `index.html` (`#contenido`, `#pagina`, `#barra`, `#colores`, `#ajustes`…). Copia esa estructura completa.
-
-## Cómo extender
-Temas nuevos (variables en `main.css`), notas editables, enlaces internos en PDF, sincronización remota del JSON de exportación, soporte de EPUB de diseño fijo o de ZIP64.
