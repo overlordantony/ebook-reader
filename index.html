@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lectura EPUB y PDF</title>
+<link rel="icon" href="icons/favicon.png">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/sidebar.css">
+<link rel="stylesheet" href="css/reader.css">
+</head>
+<body data-tema="claro">
+<aside id="sidebar" aria-label="Menú del libro">
+  <div id="info">
+    <img id="portada" alt="Portada" hidden>
+    <h1 id="titulo">Lectura EPUB</h1><p id="autor"></p>
+    <div class="prog"><div id="prog-fill"></div></div><small id="prog-txt">0%</small>
+  </div>
+  <div class="fila"><label class="btn" for="archivo">Abrir libro</label><input id="archivo" type="file" accept=".epub,.pdf,application/pdf" hidden><button id="btn-ir">Ir a capítulo…</button></div>
+  <nav id="tabs"><button data-t="indice" class="on">Índice</button><button data-t="notas">Notas</button><button data-t="buscar">Buscar</button><button data-t="estante">Estante</button></nav>
+  <section id="t-indice"></section>
+  <section id="t-notas" hidden></section>
+  <section id="t-buscar" hidden><input id="q" type="search" placeholder="Buscar y pulsar Enter"><div id="res"></div></section>
+  <section id="t-estante" hidden></section>
+</aside>
+<div id="overlay"></div>
+<main id="lector">
+  <header><button id="btn-menu" aria-label="Menú">☰</button><span id="cab"></span><button id="btn-aj" aria-label="Ajustes">Aa</button></header>
+  <div id="viewport">
+    <button class="flecha" id="ant" aria-label="Anterior">‹</button>
+    <div id="pagina"><article id="contenido"></article></div>
+    <button class="flecha" id="sig" aria-label="Siguiente">›</button>
+    <div id="vacio">Arrastra un .epub o .pdf aquí o usa «Abrir libro»</div>
+  </div>
+  <footer><button id="f-ant" aria-label="Anterior">‹</button><input id="barra" type="range" min="0" max="1000" value="0" aria-label="Progreso"><button id="f-sig" aria-label="Siguiente">›</button><span id="est"></span></footer>
+</main>
+<div id="ajustes" hidden>
+  <label>Tamaño de fuente <input id="a-tam" type="range" min="14" max="30"></label>
+  <label>Interlineado <input id="a-lh" type="range" min="1.2" max="2.2" step=".1"></label>
+  <label>Ancho de columna <input id="a-ancho" type="range" min="28" max="60"></label>
+  <label>Fuente <select id="a-fuente"><option value="serif">Serif</option><option value="sans">Sans-serif</option><option value="mono">Monospace</option></select></label>
+  <label>Tema <select id="a-tema"><option value="claro">Claro</option><option value="oscuro">Oscuro</option><option value="sepia">Sepia</option></select></label>
+  <div class="fila"><button id="exp">Exportar datos</button><label class="btn" for="imp">Importar</label><input id="imp" type="file" accept=".json" hidden></div>
+</div>
+<div id="colores" hidden>
+  <button data-c="#fff176" style="background:#fff176" aria-label="Amarillo"></button>
+  <button data-c="#a5d6a7" style="background:#a5d6a7" aria-label="Verde"></button>
+  <button data-c="#f8bbd0" style="background:#f8bbd0" aria-label="Rosa"></button>
+  <button data-c="#90caf9" style="background:#90caf9" aria-label="Azul"></button>
+  <input id="nota" placeholder="Nota (opcional)">
+</div>
+<script src="js/utils.js" defer></script>
+<script src="js/epub-parser.js" defer></script>
+<script src="js/pdf-reader.js" defer></script>
+<script src="js/settings.js" defer></script>
+<script src="js/annotations.js" defer></script>
+<script src="js/reader.js" defer></script>
+<script src="js/navigation.js" defer></script>
+</body>
+</html>
